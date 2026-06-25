@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS config must come before CDN script -->
+    <script>
+        window.tailwind = window.tailwind || {};
+        window.tailwind.config = {
+            corePlugins: { preflight: false },
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#ffffff',
+                        foreground: '#0f172a',
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Import map for ESM dependencies -->
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0?dev",
+            "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime?dev",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?dev",
+            "lucide-react": "https://esm.sh/lucide-react@1.21.0?external=react"
+        }
+    }
+    </script>
+
+    <style>
+        :root {
+            --bg: #ffffff;
+            --fg: #000000;
+            --muted: rgba(15,23,42,0.55);
+            --muted-light: rgba(15,23,42,0.45);
+            --muted-dim: rgba(15,23,42,0.4);
+            --muted-faint: rgba(15,23,42,0.35);
+            --border: rgba(0,0,0,0.08);
+            --border-dim: rgba(0,0,0,0.07);
+            --border-medium: rgba(0,0,0,0.12);
+            --card: #ffffff;
+            --card-alt: #e2e8f0;
+            --input-bg: rgba(0,0,0,0.04);
+            --accent: #f2b705;
+            --accent-muted: rgba(242,183,5,0.25);
+        }
+        .dark {
+            --bg: #0d0d0d;
+            --fg: #ffffff;
+            --muted: rgba(255,255,255,0.55);
+            --muted-light: rgba(255,255,255,0.5);
+            --muted-dim: rgba(255,255,255,0.4);
+            --muted-faint: rgba(255,255,255,0.35);
+            --border: rgba(255,255,255,0.08);
+            --border-dim: rgba(255,255,255,0.07);
+            --border-medium: rgba(255,255,255,0.12);
+            --card: #161616;
+            --card-alt: #111;
+            --input-bg: rgba(255,255,255,0.05);
+            --accent: #f2b705;
+            --accent-muted: rgba(242,183,5,0.35);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            font-size: 14px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        .header {
+            padding: 24px 0 0;
+        }
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--fg);
+            letter-spacing: 0.04em;
+        }
+        .nav {
+            display: flex;
+            gap: 40px;
+        }
+        .nav button {
+            background: none;
+            border: none;
+            font-size: 11.5px;
+            font-weight: 500;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 4px 0;
+            border-bottom: 2px solid transparent;
+            font-family: inherit;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .nav button:hover {
+            color: var(--fg);
+        }
+        .nav button.active {
+            color: #f2b705;
+            border-bottom-color: #f2b705;
+        }
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--muted);
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            font-family: inherit;
+            transition: color 0.15s;
+        }
+        .theme-toggle:hover { color: #f2b705; }
+        .hero-links .theme-toggle { color: var(--muted); }
+
+        /* PullCord — Verlet rope theme toggle */
+        .pullcord-inner {
+            position: absolute;
+            inset: 0;
+        }
+        .pullcord-inner--drop {
+            animation: pullcord-drop 0.6s 0.4s cubic-bezier(0.45, 0, 0.9, 0.5) both;
+        }
+        @keyframes pullcord-drop {
+            0% { opacity: 0; transform: translateY(-230px); }
+            20% { opacity: 1; }
+            100% { transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .pullcord-inner--drop { animation: none; }
+        }
+        .pullcord-knob {
+            -webkit-tap-highlight-color: transparent;
+            border-radius: 50%;
+        }
+        .pullcord-knob:active { cursor: grabbing; }
+        .pullcord-knob:focus-visible {
+            outline: 2px solid var(--pullcord-ink, rgba(127,127,127,0.6));
+            outline-offset: -9px;
+        }
+        :root {
+            --pullcord-top: 0px;
+            --pullcord-right: 7rem;
+            --pullcord-z: 5;
+            --pullcord-ink: rgba(127, 127, 127, 0.45);
+        }
+        .dark {
+            --pullcord-ink: rgba(200, 200, 200, 0.45);
+        }
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .menu-toggle span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--fg);
+            margin: 5px 0;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        .menu-toggle.open span:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+        .menu-toggle.open span:nth-child(2) {
+            opacity: 0;
+        }
+        .menu-toggle.open span:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+
+        @media (max-width: 768px) {
+            .header-inner {
+                flex-wrap: wrap;
+            }
+            .menu-toggle {
+                display: block;
+            }
+            .nav {
+                display: none;
+                flex-direction: column;
+                gap: 0;
+                width: 100%;
+                padding-top: 16px;
+            }
+            .nav.open {
+                display: flex;
+            }
+            .nav button {
+                width: 100%;
+                text-align: left;
+                padding: 10px 0;
+                border-bottom: 1px solid var(--border-dim);
+            }
+            .nav button:last-child {
+                border-bottom: none;
+            }
+            .nav button.active {
+                border-bottom-color: var(--border-dim);
+                color: #f2b705;
+            }
+        }
+
+        /* Section */
+        .section {
+            padding: 48px 0;
+        }
+        .section h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--fg);
+            margin-bottom: 20px;
+            letter-spacing: -0.02em;
+        }
+        .section h2::after {
+            content: '';
+            display: block;
+            width: 32px;
+            height: 3px;
+            background: #f2b705;
+            margin-top: 8px;
+            border-radius: 2px;
+        }
+        .section h2[style*="text-align:center"]::after {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+
+        /* ===== HOME — Minimalist Hero ===== */
+        .hero {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        /* Nav inside hero */
+        .hero-nav {
+            position: relative;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            padding: 26px 48px;
+        }
+        .hero-logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--fg);
+            letter-spacing: 0.04em;
+            margin-right: auto;
+        }
+        .hero-links {
+            display: flex;
+            gap: 40px;
+        }
+        .hero-links button {
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: 11.5px;
+            font-weight: 500;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 4px 0;
+            border-bottom: 2px solid transparent;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .hero-links button:hover {
+            color: var(--fg);
+        }
+        .hero-links button.active {
+            color: #f2b705;
+            border-bottom-color: #f2b705;
+        }
+        .hero-nav-right {
+            display: flex;
+            align-items: flex-start;
+            gap: 4px;
+        }
+        .pullcord-wrap {
+            position: fixed;
+            top: 0;
+            right: 0;
+            z-index: 100;
+        }
+        .pullcord-wrap .pullcord {
+            right: 0 !important;
+        }
+        .header-inner .pullcord-wrap {
+            position: fixed;
+            top: 0;
+            right: 0;
+            z-index: 100;
+        }
+        .header-inner .pullcord-wrap .pullcord {
+            right: 0 !important;
+        }
+        .hero-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .hero-menu-toggle span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--fg);
+            margin: 5px 0;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        .hero-menu-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hero-menu-toggle.open span:nth-child(2) { opacity: 0; }
+        .hero-menu-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        /* ---- Stage: the main visual area ---- */
+        .hero-stage {
+            position: relative;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Profile image — anchored to bottom of hero so it meets the footer */
+        .hero-profile-img {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            top: auto;
+            transform: translateX(-50%);
+      width: 740px;
+      height: 805px;
+            object-fit: cover;
+            object-position: center top;
+            z-index: 1;
+            filter: grayscale(0%) contrast(1.05) brightness(1);
+            transition: filter 0.6s ease;
+            animation: scaleInBottom 1s ease-out 0.1s both;
+        }
+        .hero-profile-img:hover {
+            filter: grayscale(0%) contrast(1.1) brightness(1.02);
+        }
+        .dark .hero-profile-img {
+            filter: grayscale(100%) contrast(1.05) brightness(0.97);
+        }
+        .dark .hero-profile-img:hover {
+            filter: grayscale(20%) contrast(1) brightness(1);
+        }
+
+        @keyframes fadeUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        @keyframes scaleIn {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.92); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        @keyframes scaleInBottom {
+            0% { opacity: 0; transform: translateX(-50%) scale(0.94); }
+            100% { opacity: 1; transform: translateX(-50%) scale(1); }
+        }
+
+        /* Left copy block — above image in z-order */
+        .hero-left {
+            position: absolute;
+            left: 60px;
+            top: 32%;
+            transform: translateY(-50%);
+            z-index: 5;
+            max-width: 320px;
+            animation: fadeIn 0.8s ease-out both;
+        }
+        .hero-left-name {
+            font-size: 50px;
+            font-weight: 900;
+            color: var(--fg);
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            animation: fadeUp 0.8s ease-out 0.15s both;
+        }
+        .hero-left p {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.5;
+            margin-bottom: 8px;
+            animation: fadeUp 0.8s ease-out 0.3s both;
+        }
+        .hero-read-more {
+            display: inline-block;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--fg);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: inherit;
+            padding: 0;
+            transition: opacity 0.2s;
+            animation: fadeUp 0.8s ease-out 0.45s both;
+        }
+        .hero-read-more:hover { opacity: 0.65; }
+        .hero-less-text {
+            position: absolute;
+            right: 48px;
+            bottom: 90px;
+            top: auto;
+            transform: none;
+            font-size: 55px;
+            font-weight: 900;
+            color: var(--border-dim);
+            letter-spacing: -0.03em;
+            text-transform: none;
+            line-height: 1;
+            z-index: 1;
+            animation: revealRight 0.9s cubic-bezier(.65,0,.15,1) 0.6s both;
+            pointer-events: none;
+        }
+
+
+        .hero-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        @keyframes revealRight {
+            0% { clip-path: inset(0 100% 0 0); }
+            100% { clip-path: inset(0 0 0 0); }
+        }
+
+        /* Bottom bar */
+        .hero-bottom {
+            position: relative;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 22px 48px;
+            margin-bottom: 16px;
+            animation: fadeUp 0.8s ease-out 0.7s both;
+        }
+        .hero-socials {
+            display: flex;
+            gap: 22px;
+            align-items: center;
+        }
+        .hero-socials a {
+            color: var(--muted-light);
+            transition: color 0.2s, transform 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .hero-socials a:hover {
+            color: #f2b705;
+            transform: translateY(-2px);
+        }
+        .hero-location {
+            font-size: 11.5px;
+            letter-spacing: 0.1em;
+            color: var(--muted-light);
+            text-transform: uppercase;
+        }
+        .hero-left-location {
+            display: none;
+            font-size: 11.5px;
+            letter-spacing: 0.1em;
+            color: var(--muted-light);
+            text-transform: uppercase;
+            margin-top: 12px;
+        }
+        .hero-left-socials {
+            display: none;
+            gap: 18px;
+            margin-top: 14px;
+            justify-content: center;
+        }
+        .hero-left-socials a {
+            color: var(--muted-light);
+            transition: color 0.2s;
+        }
+        .hero-left-socials a:hover {
+            color: #f2b705;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .hero { overflow: hidden; -webkit-overflow-scrolling: touch; }
+            .hero-nav { padding: 18px 24px; flex-shrink: 0; flex-wrap: wrap; }
+            .hero-links { display: none; flex-direction: column; width: 100%; order: 10; padding: 16px 0 0; gap: 0; }
+            .hero-links.open { display: flex; }
+            .hero-links button { width: 100%; padding: 10px 0; border-bottom: 1px solid var(--border-dim); text-align: left; }
+            .hero-links button:last-child { border-bottom: none; }
+            .hero-links button.active { color: #f2b705; }
+            .hero-menu-toggle { display: block; }
+            .hero-stage {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                flex: 1 0 auto;
+                overflow: hidden;
+                padding: 0;
+            }
+            .hero-left {
+                display: flex;
+                flex-direction: column;
+                position: relative;
+                left: auto;
+                top: auto;
+                transform: none;
+                max-width: none;
+                padding: 28px 0 20px;
+                text-align: center;
+                align-items: center;
+            }
+            .hero-left-name { font-size: 36px; white-space: normal; }
+            .hero-left p { font-size: 12px; max-width: 300px; text-align: center; }
+            .hero-less-text {
+                display: none;
+            }
+            .hero-profile-img {
+                position: relative;
+                left: 0;
+                top: auto;
+                transform: none;
+                width: 100vw;
+                max-width: 100vw;
+                height: 58vh;
+                margin: auto 0 0;
+                flex-shrink: 1;
+                order: 1;
+                animation: none;
+                object-fit: cover;
+                object-position: center top;
+            }
+            .hero-left-location { display: block; }
+            .hero-left-socials { display: flex; }
+            .hero-bottom .hero-location { display: none; }
+            .hero-bottom .hero-socials { display: none; }
+            .hero-bottom { padding: 0 24px 14px; flex-wrap: wrap; gap: 10px; flex-shrink: 0; }
+            .hero-socials { gap: 16px; }
+
+            body.hero-active { overflow: auto; }
+        }
+
+        /* Non-home pages */
+        .page-wrap {
+            background: var(--bg);
+            min-height: 100vh;
+            animation: fadeIn 0.5s ease-out both;
+        }
+
+        .page-section {
+            animation: fadeUp 0.6s ease-out 0.1s both;
+        }
+
+        .page-section h2 {
+            animation: fadeUp 0.6s ease-out 0.15s both;
+        }
+
+        .stagger-item {
+            animation: fadeUp 0.5s ease-out both;
+        }
+
+        .stagger-item:nth-child(1) { animation-delay: 0.1s; }
+        .stagger-item:nth-child(2) { animation-delay: 0.18s; }
+        .stagger-item:nth-child(3) { animation-delay: 0.26s; }
+        .stagger-item:nth-child(4) { animation-delay: 0.34s; }
+        .stagger-item:nth-child(5) { animation-delay: 0.42s; }
+        .stagger-item:nth-child(6) { animation-delay: 0.5s; }
+
+        /* Work card content slide */
+.work-card-anim { animation: slideUp 0.5s ease-out both; }
+        .work-card-anim:nth-child(1) { animation-delay: 0.1s; }
+        .work-card-anim:nth-child(2) { animation-delay: 0.2s; }
+        .work-card-anim:nth-child(3) { animation-delay: 0.3s; }
+        .work-card-anim:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes slideUp {
+            0% { opacity: 0; transform: translateY(12px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .controls-anim {
+            animation: fadeUp 0.6s ease-out 0.2s both;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        @media (min-width: 640px) {
+            .controls {
+                flex-direction: row;
+                align-items: center;
+            }
+        }
+
+        .search-wrap {
+            position: relative;
+            flex: 1;
+            max-width: 360px;
+        }
+        .search-wrap input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-medium);
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            background: #e5e7eb;
+            color: var(--fg);
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .dark .search-wrap input {
+            background: #fff;
+            color: #000;
+        }
+        .search-wrap input::placeholder { color: var(--muted-faint); }
+        .dark .search-wrap input::placeholder { color: rgba(0,0,0,0.35); }
+        .search-wrap input:focus {
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
+        }
+
+        .filters {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-left: auto;
+        }
+        .filter-btn {
+            background: none;
+            border: none;
+            padding: 4px 0;
+            font-size: 12px;
+            font-family: inherit;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .filter-btn:hover {
+            color: var(--fg);
+        }
+        .filter-btn.active {
+            color: #f2b705;
+            border-bottom-color: #f2b705;
+        }
+
+        .grid-4col {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 12px;
+        }
+        @media (min-width: 1100px) {
+            .grid-4col { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        /* Tool cards */
+        .tool-card {
+            background: var(--card);
+            border: 1px solid var(--border-dim);
+            border-radius: 0;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(.34,1.56,.64,1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+        .dark .tool-card {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .tool-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1);
+        }
+        .dark .tool-card:hover {
+            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.4);
+        }
+        .card-preview {
+            width: 100%;
+            height: 256px;
+            overflow: hidden;
+        }
+        .card-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+        .tool-card:hover .card-preview img {
+            transform: scale(1.08);
+        }
+        .card-body {
+            padding: 20px;
+        }
+        .card-title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--fg);
+            line-height: 1.3;
+        }
+        .card-description {
+            font-size: 0.875rem;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+        .card-link {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--muted);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            margin-top: 12px;
+            letter-spacing: 0.05em;
+            transition: color 0.2s;
+        }
+        .card-link:hover {
+            color: #f2b705;
+        }
+
+        /* Work cards */
+        .card {
+            background: var(--card);
+            border-radius: 8px;
+            padding: 22px 24px;
+            cursor: default;
+            height: 100%;
+            transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s ease;
+        }
+        .work-section-label {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--fg);
+            line-height: 1.3;
+            margin-bottom: 12px;
+        }
+        .scale-letter {
+            display: inline-block;
+            animation: scaleLetter 0.6s ease-out both;
+        }
+        @keyframes scaleLetter {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .work-card {
+            background: var(--card);
+            border: none;
+            border-radius: 8px;
+            padding: 22px 24px;
+            cursor: default;
+            height: 100%;
+            transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s ease;
+        }
+        .dark .work-card {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+        }
+        .card-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+        .work-arrow {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            color: var(--muted-faint);
+            transition: transform 0.2s;
+        }
+
+        /* Empty state */
+        .empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--card);
+            border: 1px dashed rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        .empty h3 {
+            font-size: 16px;
+            color: var(--fg);
+            margin-bottom: 4px;
+        }
+        .empty p {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+
+        /* body scroll lock when hero is showing */
+        body.hero-active {
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/@babel/standalone@7.23.9/babel.min.js"></script>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+        import { createRoot } from 'react-dom/client';
+
+        const workData = [
+            {
+                id: 1, company: "ZTE Myanmar", role: "RAN Capacity Engineer", period: "2024/08 – Present",
+                details: [
+                    "Monitored and analyzed RAN KPIs, traffic trends, and capacity utilization across 3G/4G of Ooredoo networks.",
+                    "Performed real-time incident handling for cell-level and cluster-wide degradations including congestion, hardware failures, and radio interference.",
+                    "Conducted daily and weekly network performance audits and generated capacity planning reports using PMS, V-MAX R, V-MAX S, and Nokia NetAct.",
+                    "Collaborated with RF Optimization, Transmission, and Core teams to investigate service-affecting issues.",
+                    "Participated in network expansion, forecasting sector utilization, and recommending carrier additions or site upgrades.",
+                    "Developed and automated dashboards using Excel VBA and Power BI.",
+                    "Ensured SLA compliance and escalated critical outages according to MTTR."
+                ]
+            },
+            {
+                id: 2, company: "Telecom International Myanmar", role: "Radio Network Design & Planning Engineer", period: "2022/01 – 2024/07",
+                details: [
+                    "Planned daily TRX for network congestion cells using Atoll AFP tools.",
+                    "Designed 2G/4G cell parameters for new site deployments and network upgrades.",
+                    "Identified weak coverage areas and coverage holes using Atoll site planning tools.",
+                    "Managed site and 2G/4G cell database; updated weekly optimization changes.",
+                    "Collaborated with site server team to suggest nominal locations for new site setups.",
+                    "Collaborated with partner tower companies to recommend RF device installations.",
+                    "Maintained database for self-build and co-location sites; supported acceptance forms.",
+                    "Replanned 2G same frequencies to minimize interference.",
+                    "Optimized and load-shared weak coverage areas (E-tilt, M-tilt, Azimuth).",
+                    "Replanned neighbor relations and monthly 2G frequency adjustments using DataX and Atoll."
+                ]
+            },
+            {
+                id: 3, company: "Telecom International Myanmar", role: "Radio Network Optimization Engineer", period: "2019/03 – 2022/01",
+                details: [
+                    "Monitored daily network KPIs and prepared reports for stakeholders.",
+                    "Resolved voice and data customer complaints in WBG region.",
+                    "Analyzed and optimized worst-performing 2G/4G cells.",
+                    "Upgraded TRX of congested cells in Huawei network.",
+                    "Prepared monthly neighbor relation updates and applied to system.",
+                    "Managed monthly township-level cluster optimization based on KPIs and log analysis.",
+                    "Collaborated with branch business teams for voice/data quality issues.",
+                    "Corrected misconfigured parameters (4T4R, CA, missing CSFB, PCI, TRX)."
+                ]
+            },
+            {
+                id: 4, company: "China Communications Services", role: "Radio OSS Engineer", period: "2017/06 – 2019/02",
+                details: [
+                    "Monitored network performance, identified faults, and collaborated with site engineers.",
+                    "Generated daily/weekly CR, SSV, Cluster reports using iManager and PRS.",
+                    "Recommended network improvements such as antenna adjustments and reorientation.",
+                    "Analyzed KPIs and identified root causes for call drops, failures, and handover issues.",
+                    "Collaborated with optimization and drive test teams to improve weak signal areas."
+                ]
+            }
+        ];
+
+        function ScaleLetterText({ text, className = '' }) {
+            return (
+                <span className={className}>
+                    {text.split('').map((char, i) => (
+                        <span key={i} className="scale-letter" style={{animationDelay: `${i * 0.04}s`}}>
+                            {char === ' ' ? '\u00A0' : char}
+                        </span>
+                    ))}
+                </span>
+            );
+        }
+
+        function WorkCard({ item, isFirst }) {
+            return (
+                <div className="work-card">
+                    {isFirst && <h2 className="work-section-label">Work Experience</h2>}
+                    <div className="card-top">
+                        <div style={{flex:1}}>
+                            <span className="card-title work-card-anim" style={{fontSize:'15px', color:'var(--fg)'}}>{item.company}</span>
+                            <p className="work-card-anim" style={{fontSize:'13px', color:'#f2b705', fontWeight:500, marginTop:4}}>{item.role}</p>
+                            <p className="work-card-anim" style={{fontSize:'12px', color:'var(--muted-faint)', marginTop:2}}>{item.period}</p>
+                        </div>
+                    </div>
+                    <ul style={{marginTop:14, paddingLeft:20, listStyle:'disc'}}>
+                        {item.details.map((d, i) => (
+                            <li key={i} className="work-card-anim" style={{fontSize:'13px', color:'var(--muted)', lineHeight:1.75, marginBottom:4}}>{d}</li>
+                        ))}
+                    </ul>
+                </div>
+            );
+        }
+
+        const tools = [
+            { id: 1, name: "Point File Creator", desc: "Create point-based maps from CSV/Excel data and export to KML format.", cats: ["Map Tools"], url: "https://point-file-creator.vercel.app/", readme: "https://github.com/soemoehtun/Point-File-Creator/blob/main/README.md", thumb: "Assets/Tools Thumbnail/Point File Creator.png" },
+            { id: 2, name: "Site to Site Distance Calculator", desc: "Calculate the precise geodetic distance between two network sites.", cats: ["Map Tools"], url: "https://site-2-site-distance-calculator.vercel.app/", readme: "https://github.com/soemoehtun/Site-2-Site-Distance-Calculator/blob/main/README.md", thumb: "Assets/Tools Thumbnail/Site To Site Distance.png" },
+            { id: 3, name: "Cell Parameter KML Export Tool", desc: "Convert site data into KML format for Google Earth visualization.", cats: ["Map Tools"], url: "https://engineering-parameter-kml-creator.vercel.app/", readme: "https://github.com/soemoehtun/Engineering-Parameter-KML-creator/blob/main/README.md", thumb: "Assets/Tools Thumbnail/Cell File Creator.png" },
+            { id: 4, name: "Sector to Site Distance Calculator", desc: "Calculate the distance from a sector antenna to a target site.", cats: ["Map Tools"], url: "https://sector-to-site-distance-calculator.vercel.app/", readme: "https://github.com/soemoehtun/Sector-To-Site-Distance-Calculator/blob/main/README.md", thumb: "Assets/Tools Thumbnail/Sector To Site Distance.png" },
+            { id: 5, name: "Cell ID Calculator", desc: "Encode and decode 2G/3G/4G/5G cell identifiers — CGI, ECGI, and NCI.", cats: ["Converter Tools", "Telecom Tools"], url: "https://cell-id-calculator.vercel.app/", readme: "https://github.com/soemoehtun/cell-id-calculator/blob/main/README.md", thumb: "Assets/Tools Thumbnail/Cell ID Calculator.png" },
+            { id: 6, name: "Gold Calculator", desc: "Calculate gold purity, value, and weight conversions easily.", cats: ["Calculator Tools"], url: "https://gold-calculator-six-pi.vercel.app/", readme: "https://github.com/soemoehtun/Gold-Calculator/blob/main/README.md", thumb: "Assets/Tools Thumbnail/Gold Calculator.png" }
+        ];
+
+        const cats = ["All", "Map Tools", "Converter Tools", "Calculator Tools", "Telecom Tools"];
+
+        function Card({ t }) {
+            return (
+                                <div className="tool-card stagger-item" onClick={() => window.open(t.url, '_blank')}>
+                    <div className="card-preview">
+                        {t.thumb && <img src={t.thumb} alt={t.name} />}
+                    </div>
+                    <div className="card-body">
+                        <div className="card-title-row">
+                            <span className="card-title">{t.name}</span>
+                        </div>
+                        <p className="card-description">{t.desc}</p>
+                        {t.readme && (
+                            <a href={t.readme} target="_blank" rel="noopener noreferrer" className="card-link" onClick={e => e.stopPropagation()}>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" /></svg>
+                                README
+                            </a>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        function PullCord({ onPull, pulled = false, ariaLabel = 'Toggle theme', noEntrance = false }) {
+            const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const W = 64, ANCHOR_X = 32, REST_Y = 176, SVG_H = 340, SEGMENTS = 16, REST_SEG = REST_Y / SEGMENTS, KNOB_R = 6.5, HIT = 46;
+
+            function buildPath(p) {
+                let d = `M ${p[0].x.toFixed(1)} ${p[0].y.toFixed(1)}`;
+                for (let i = 1; i < p.length - 1; i++) {
+                    const xc = (p[i].x + p[i + 1].x) / 2;
+                    const yc = (p[i].y + p[i + 1].y) / 2;
+                    d += ` Q ${p[i].x.toFixed(1)} ${p[i].y.toFixed(1)} ${xc.toFixed(1)} ${yc.toFixed(1)}`;
+                }
+                d += ` L ${p[p.length - 1].x.toFixed(1)} ${p[p.length - 1].y.toFixed(1)}`;
+                return d;
+            }
+
+            function makeNodes() {
+                const arr = [];
+                for (let i = 0; i <= SEGMENTS; i++) {
+                    const y = REST_SEG * i;
+                    arr.push({ x: ANCHOR_X, y, ox: ANCHOR_X, oy: y, fixed: i === 0 });
+                }
+                return arr;
+            }
+
+            const gravity = 1250, damping = 0.94, iterations = 20, stretchMax = 26, stretchToggle = 20, maxVelocity = 22, sleepVelocity = 0.15;
+            const INITIAL_PATH = buildPath(makeNodes());
+
+            const knobRef = useRef(null), cordRef = useRef(null), groupRef = useRef(null), wrapperRef = useRef(null);
+            const dragging = useRef(false), didDrag = useRef(false), clicked = useRef(false);
+            const target = useRef({ x: ANCHOR_X, y: REST_Y }), wake = useRef(() => {});
+            const onPullRef = useRef(onPull);
+            onPullRef.current = onPull;
+            const nodesRef = useRef(null);
+            if (nodesRef.current === null) nodesRef.current = makeNodes();
+            const startPointer = useRef({ x: 0, y: 0 });
+
+            const [drop, setDrop] = useState(!noEntrance);
+            const dropDone = useRef(noEntrance);
+
+            useEffect(() => {
+                const pts = nodesRef.current, last = pts.length - 1;
+                let raf = 0, running = false, prevT = 0, prevDt = 0;
+
+                const render = () => {
+                    if (cordRef.current) cordRef.current.setAttribute('d', buildPath(pts));
+                    if (groupRef.current) groupRef.current.setAttribute('transform', `translate(${(pts[last].x - ANCHOR_X).toFixed(2)} ${(pts[last].y - REST_Y).toFixed(2)})`);
+                };
+
+                const step = (now) => {
+                    const dt = prevT ? Math.min(0.04, Math.max(0.004, (now - prevT) / 1000)) : 1 / 60;
+                    prevT = now;
+                    const tc = prevDt > 0 ? dt / prevDt : 1;
+                    const velCoef = tc * Math.pow(damping, dt * 60);
+                    const accCoef = dt * dt;
+
+                    pts[last].fixed = dragging.current;
+                    for (let i = 1; i < pts.length; i++) {
+                        const p = pts[i]; if (p.fixed) continue;
+                        const vx = p.x - p.ox, vy = p.y - p.oy;
+                        p.ox = p.x; p.oy = p.y;
+                        p.x += vx * velCoef; p.y += vy * velCoef + gravity * accCoef;
+                    }
+                    pts[0].x = ANCHOR_X; pts[0].y = 0;
+                    if (dragging.current) {
+                        pts[last].ox = pts[last].x; pts[last].oy = pts[last].y;
+                        pts[last].x = target.current.x; pts[last].y = target.current.y;
+                    }
+                    for (let k = 0; k < iterations; k++) {
+                        for (let i = 0; i < last; i++) {
+                            const a = pts[i], b = pts[i + 1];
+                            const dx = b.x - a.x, dy = b.y - a.y;
+                            const dist = Math.hypot(dx, dy) || 0.0001;
+                            const diff = ((REST_SEG - dist) / dist) * 0.5;
+                            const ox = dx * diff, oy = dy * diff;
+                            if (!a.fixed) { a.x -= ox; a.y -= oy; }
+                            if (!b.fixed) { b.x += ox; b.y += oy; }
+                        }
+                    }
+                    prevDt = dt; render();
+                    let speed = 0;
+                    for (let i = 1; i < pts.length; i++) speed += Math.abs(pts[i].x - pts[i].ox) + Math.abs(pts[i].y - pts[i].oy);
+                    if (!dragging.current && speed < sleepVelocity * dt * 60) {
+                        render(); running = false; return;
+                    }
+                    raf = requestAnimationFrame(step);
+                };
+
+                const start = () => {
+                    if (raf) cancelAnimationFrame(raf);
+                    running = true; prevT = 0; prevDt = 0;
+                    raf = requestAnimationFrame(step);
+                };
+
+                wake.current = start;
+                render();
+                return () => { running = false; cancelAnimationFrame(raf); };
+            }, []);
+
+            const doToggle = () => onPullRef.current?.();
+
+            const scriptedPull = () => {
+                doToggle();
+                if (reduce || !nodesRef.current) return;
+                const pts = nodesRef.current;
+                pts[pts.length - 1].oy -= 22;
+                wake.current();
+            };
+
+            const onPointerDown = (e) => {
+                if (!wrapperRef.current) return;
+                e.currentTarget.setPointerCapture(e.pointerId);
+                dragging.current = true; didDrag.current = true; clicked.current = false;
+                const rect = wrapperRef.current.getBoundingClientRect();
+                startPointer.current = { x: e.clientX - rect.left - ANCHOR_X, y: e.clientY - rect.top - REST_Y };
+                wake.current();
+            };
+
+            const onPointerMove = (e) => {
+                if (!dragging.current || !wrapperRef.current) return;
+                const rect = wrapperRef.current.getBoundingClientRect();
+                const rx = e.clientX - rect.left - ANCHOR_X - startPointer.current.x;
+                const ry = e.clientY - rect.top - REST_Y - startPointer.current.y;
+                const dist = Math.hypot(rx, ry) || 0.0001;
+                const maxD = REST_Y + stretchMax;
+                const k = dist > maxD ? maxD / dist : 1;
+                target.current = { x: ANCHOR_X + rx * k, y: REST_Y + ry * k };
+                const clickAt = Math.min(stretchToggle, stretchMax - 1);
+                if (!clicked.current && dist >= clickAt) {
+                    clicked.current = true;
+                    doToggle();
+                }
+            };
+
+            const onPointerUp = (e) => {
+                if (!nodesRef.current) return;
+                try { e.currentTarget.releasePointerCapture(e.pointerId); } catch (_) {}
+                dragging.current = false;
+                const pts = nodesRef.current, p = pts[pts.length - 1];
+                const vx = p.x - p.ox, vy = p.y - p.oy, v = Math.hypot(vx, vy);
+                if (v > maxVelocity) { const k = maxVelocity / v; p.ox = p.x - vx * k; p.oy = p.y - vy * k; }
+                wake.current();
+                requestAnimationFrame(() => { didDrag.current = false; });
+            };
+
+            const onClick = (e) => { if (didDrag.current) return; if (e.detail === 0) return; scriptedPull(); };
+            const onKeyDown = (e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) { e.preventDefault(); scriptedPull(); } };
+
+            const endDrop = useCallback(() => {
+                if (dropDone.current) return;
+                dropDone.current = true; setDrop(false);
+                if (reduce) return;
+                const pts = nodesRef.current; if (!pts) return;
+                pts[pts.length - 1].oy -= 13; pts[pts.length - 1].ox -= 6;
+                wake.current();
+            }, [reduce]);
+
+            useEffect(() => {
+                if (noEntrance) return;
+                const fb = setTimeout(endDrop, 1700);
+                return () => clearTimeout(fb);
+            }, [endDrop, noEntrance]);
+
+            const onDropEnd = (e) => { if (e.animationName !== 'pullcord-drop') return; endDrop(); };
+
+            return (
+                <div className="pullcord" style={{position:'fixed',top:'var(--pullcord-top,0px)',right:'var(--pullcord-right,7rem)',zIndex:'var(--pullcord-z,5)',width:W,height:SVG_H,pointerEvents:'none'}}>
+                    <div ref={wrapperRef} className={drop ? 'pullcord-inner pullcord-inner--drop' : 'pullcord-inner'} onAnimationEnd={onDropEnd}>
+                        <svg viewBox={`0 0 ${W} ${SVG_H}`} width={W} height={SVG_H} aria-hidden="true" style={{overflow:'visible'}}>
+                            <defs>
+                                <linearGradient id="pc-knob" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#ffffff" /><stop offset="100%" stopColor="#e7e7ec" />
+                                </linearGradient>
+                                <filter id="pc-knob-sh" x="-70%" y="-70%" width="240%" height="240%">
+                                    <feDropShadow dx="0" dy="1.4" stdDeviation="1.5" floodColor="rgba(0,0,0,0.32)" />
+                                </filter>
+                            </defs>
+                            <path ref={cordRef} d={INITIAL_PATH} stroke="var(--pullcord-ink,rgba(127,127,127,0.45))" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" fill="none" vectorEffect="non-scaling-stroke" />
+                            <g ref={groupRef}>
+                                <g filter="url(#pc-knob-sh)">
+                                    <circle cx={ANCHOR_X} cy={REST_Y} r={KNOB_R} fill="url(#pc-knob)" stroke="rgba(0,0,0,0.10)" strokeWidth={0.5} />
+                                </g>
+                            </g>
+                        </svg>
+                        <button ref={knobRef} type="button" className="pullcord-knob" aria-label={ariaLabel} aria-pressed={pulled} title={ariaLabel}
+                            onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp}
+                            onClick={onClick} onKeyDown={onKeyDown}
+                            style={{position:'absolute',left:ANCHOR_X-HIT/2,top:REST_Y-HIT/2,width:HIT,height:HIT,padding:0,border:'none',background:'transparent',cursor:'grab',touchAction:'none',pointerEvents:'auto'}} />
+                    </div>
+                </div>
+            );
+        }
+
+        function App() {
+            const [page, setPage] = useState("Home");
+            const [q, setQ] = useState("");
+            const [cat, setCat] = useState("All");
+            const [menuOpen, setMenuOpen] = useState(false);
+            const [dark, setDark] = useState(() => {
+                const saved = localStorage.getItem('theme');
+                return saved !== null ? saved === 'dark' : true;
+            });
+
+
+            React.useEffect(() => {
+                document.documentElement.classList.toggle('dark', dark);
+                localStorage.setItem('theme', dark ? 'dark' : 'light');
+            }, [dark]);
+
+            const filtered = useMemo(() =>
+                tools.filter(t =>
+                    (cat === "All" || t.cats.includes(cat)) &&
+                    (t.name.toLowerCase().includes(q.toLowerCase()) || t.desc.toLowerCase().includes(q.toLowerCase()))
+                ), [q, cat]);
+
+            const pages = ["Home", "Project", "Work Experience", "Certificates"];
+
+            const handleNav = (p) => {
+                setPage(p);
+                setMenuOpen(false);
+            };
+
+            const isHome = page === "Home";
+
+            React.useEffect(() => {
+                if (isHome) {
+                    document.body.classList.add('hero-active');
+                } else {
+                    document.body.classList.remove('hero-active');
+                }
+                return () => document.body.classList.remove('hero-active');
+            }, [isHome]);
+
+            return (
+                <>
+                    {/* ---- HERO HOME ---- */}
+                    {isHome && (
+                        <div className="hero">
+                            <nav className="hero-nav">
+                                <div className="hero-logo">SMT.</div>
+                                    <div className="hero-nav-right">
+                                        <button
+                                            className={'hero-menu-toggle' + (menuOpen ? ' open' : '')}
+                                            onClick={() => setMenuOpen(!menuOpen)}
+                                            aria-label="Toggle menu"
+                                        >
+                                            <span></span><span></span><span></span>
+                                        </button>
+                                        <div className="pullcord-wrap">
+                                            <PullCord onPull={() => setDark(d => !d)} pulled={dark} />
+                                        </div>
+                                    </div>
+                                    <div className={'hero-links' + (menuOpen ? ' open' : '')}>
+                                        {pages.map(p => (
+                                            <button key={p} className={page === p ? 'active' : ''} onClick={() => handleNav(p)}>{p}</button>
+                                        ))}
+                                    </div>
+                                </nav>
+
+                                <div className="hero-stage">
+                                <div className="hero-less-text"><ScaleLetterText text="less is more" /></div>
+                                    <div className="hero-left">
+                                    <div className="hero-left-name"><ScaleLetterText text="Soe Moe Tun" /></div>
+                                    <p>Radio Network Planning &amp; Optimization Engineer with 7+ years of experience in 2G / 3G / 4G networks across Myanmar.</p>
+                                    <button className="hero-read-more" onClick={() => handleNav('Work Experience')}>Read More</button>
+                                    <div className="hero-left-location">Yangon, Myanmar</div>
+                                    <div className="hero-left-socials">
+                                        <a href="https://www.linkedin.com/in/soe-moe-tun-04346b186/" target="_blank" rel="noopener noreferrer" title="LinkedIn">
+                                            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                                        </a>
+                                        <a href="https://github.com/soemoehtun" target="_blank" rel="noopener noreferrer" title="GitHub">
+                                            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                                        </a>
+                                        <a href="mailto:soemoetun.ec@gmail.com" title="Email">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                        </a>
+                                        <a href="tel:+959680718944" title="Phone">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <img
+                                    src="Assets/images/profile.png"
+                                    alt="Soe Moe Tun"
+                                    className="hero-profile-img"
+                                />
+                            </div>
+
+                            <div className="hero-bottom">
+                                <div className="hero-socials">
+                                    <a href="https://www.linkedin.com/in/soe-moe-tun-04346b186/" target="_blank" rel="noopener noreferrer" title="LinkedIn">
+                                        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                                    </a>
+                                    <a href="https://github.com/soemoehtun" target="_blank" rel="noopener noreferrer" title="GitHub">
+                                        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825-.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                                    </a>
+                                    <a href="mailto:soemoetun.ec@gmail.com" title="Email">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                    </a>
+                                    <a href="tel:+959680718944" title="Phone">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                                    </a>
+                                </div>
+                                <div className="hero-info">
+                                    <div className="hero-location">Yangon, Myanmar</div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ---- NON-HOME PAGES ---- */}
+                    {!isHome && (
+                        <div className="page-wrap">
+                            <div className="container">
+                                <div className="header">
+                                    <div className="header-inner">
+                                        <div className="logo">SMT.</div>
+                                        <button className={'menu-toggle' + (menuOpen ? ' open' : '')} onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
+                                            <span></span><span></span><span></span>
+                                        </button>
+                                        <div className="pullcord-wrap">
+                                            <PullCord onPull={() => setDark(d => !d)} pulled={dark} />
+                                        </div>
+                                        <nav className={'nav' + (menuOpen ? ' open' : '')}>
+                                            {pages.map(p => (
+                                                <button key={p} className={page === p ? 'active' : ''} onClick={() => handleNav(p)}>{p}</button>
+                                            ))}
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {page === "Certificates" && (
+                                <div className="container">
+                                    <div className="section page-section">
+                                        <h2>Certificates</h2>
+                                        <div className="grid" style={{gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:'24px'}}>
+                                            <a href="Assets/certificates/Excel Skills for Business.pdf" target="_blank" className="block stagger-item" style={{textDecoration:'none'}}>
+                                                <img src="Assets/certificates/Excel Skills for Business.jpg" alt="Excel Skills for Business" loading="lazy"
+                                                    style={{width:'100%', borderRadius:'0', boxShadow:'0 4px 12px rgba(0,0,0,0.1)', border:'1px solid #d1d5db', transition:'all 0.2s', cursor:'pointer'}}
+                                                    onMouseOver={e => {e.currentTarget.style.opacity='0.8'; e.currentTarget.style.transform='translateY(-4px) scale(1.01)'; e.currentTarget.style.boxShadow='0 8px 24px rgba(0,0,0,0.15)'}}
+                                                    onMouseOut={e => {e.currentTarget.style.opacity='1'; e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'}} />
+                                            </a>
+                                            <a href="Assets/certificates/RPA.pdf" target="_blank" className="block stagger-item" style={{textDecoration:'none'}}>
+                                                <img src="Assets/certificates/RPA.jpg" alt="Robotic Process Automation" loading="lazy"
+                                                    style={{width:'100%', borderRadius:'0', boxShadow:'0 4px 12px rgba(0,0,0,0.1)', border:'1px solid #d1d5db', transition:'all 0.2s', cursor:'pointer'}}
+                                                    onMouseOver={e => {e.currentTarget.style.opacity='0.8'; e.currentTarget.style.transform='translateY(-4px) scale(1.01)'; e.currentTarget.style.boxShadow='0 8px 24px rgba(0,0,0,0.15)'}}
+                                                    onMouseOut={e => {e.currentTarget.style.opacity='1'; e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'}} />
+                                            </a>
+                                            <a href="Assets/certificates/5G for Everyone.pdf" target="_blank" className="block stagger-item" style={{textDecoration:'none'}}>
+                                                <img src="Assets/certificates/5G for Everyone.jpg" alt="5G for Everyone" loading="lazy"
+                                                    style={{width:'100%', borderRadius:'0', boxShadow:'0 4px 12px rgba(0,0,0,0.1)', border:'1px solid #d1d5db', transition:'all 0.2s', cursor:'pointer'}}
+                                                    onMouseOver={e => {e.currentTarget.style.opacity='0.8'; e.currentTarget.style.transform='translateY(-4px) scale(1.01)'; e.currentTarget.style.boxShadow='0 8px 24px rgba(0,0,0,0.15)'}}
+                                                    onMouseOut={e => {e.currentTarget.style.opacity='1'; e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'}} />
+                                            </a>
+                                            <a href="Assets/certificates/Wireless Communications for Everybody.pdf" target="_blank" className="block stagger-item" style={{textDecoration:'none'}}>
+                                                <img src="Assets/certificates/Wireless Communications for Everybody.jpg" alt="Wireless Communications for Everybody" loading="lazy"
+                                                    style={{width:'100%', borderRadius:'0', boxShadow:'0 4px 12px rgba(0,0,0,0.1)', border:'1px solid #d1d5db', transition:'all 0.2s', cursor:'pointer'}}
+                                                    onMouseOver={e => {e.currentTarget.style.opacity='0.8'; e.currentTarget.style.transform='translateY(-4px) scale(1.01)'; e.currentTarget.style.boxShadow='0 8px 24px rgba(0,0,0,0.15)'}}
+                                                    onMouseOut={e => {e.currentTarget.style.opacity='1'; e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'}} />
+                                            </a>
+                                            <a href="Assets/certificates/4G.pdf" target="_blank" className="block stagger-item" style={{textDecoration:'none'}}>
+                                                <img src="Assets/certificates/4G.jpg" alt="4G LTE" loading="lazy"
+                                                    style={{width:'100%', borderRadius:'0', boxShadow:'0 4px 12px rgba(0,0,0,0.1)', border:'1px solid #d1d5db', transition:'all 0.2s', cursor:'pointer'}}
+                                                    onMouseOver={e => {e.currentTarget.style.opacity='0.8'; e.currentTarget.style.transform='translateY(-4px) scale(1.01)'; e.currentTarget.style.boxShadow='0 8px 24px rgba(0,0,0,0.15)'}}
+                                                    onMouseOut={e => {e.currentTarget.style.opacity='1'; e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'}} />
+                                            </a>
+                                            <a href="Assets/certificates/cisco.pdf" target="_blank" className="block stagger-item" style={{textDecoration:'none'}}>
+                                                <img src="Assets/certificates/cisco.jpg" alt="Cisco Networking" loading="lazy"
+                                                    style={{width:'100%', borderRadius:'0', boxShadow:'0 4px 12px rgba(0,0,0,0.1)', border:'1px solid #d1d5db', transition:'all 0.2s', cursor:'pointer'}}
+                                                    onMouseOver={e => {e.currentTarget.style.opacity='0.8'; e.currentTarget.style.transform='translateY(-4px) scale(1.01)'; e.currentTarget.style.boxShadow='0 8px 24px rgba(0,0,0,0.15)'}}
+                                                    onMouseOut={e => {e.currentTarget.style.opacity='1'; e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'}} />
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {page === "Work Experience" && (
+                                <div className="container">
+                                    <div className="section page-section">
+                                        <div className="grid" style={{gridTemplateColumns:'1fr', maxWidth:'800px', margin:'0 auto'}}>
+                                            {workData.map((w, i) => (
+                                                <div key={w.id} className="stagger-item">
+                                                    <WorkCard item={w} isFirst={i === 0} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {page === "Project" && (
+                                <div className="container">
+                                    <div className="section page-section">
+                                        <h2>Projects</h2>
+                                    </div>
+                                    <div className="controls controls-anim">
+                                        <div className="search-wrap">
+                                            <input type="text" placeholder="Search tools..." value={q} onChange={e => setQ(e.target.value)} />
+                                        </div>
+                                        <div className="filters">
+                                            {cats.map(c => (
+                                                <button key={c} className={'filter-btn' + (cat === c ? ' active' : '')} onClick={() => setCat(c)}>{c}</button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-4col">
+                                        {filtered.length ? filtered.map(t => <Card key={t.id} t={t} />) : (
+                                            <div className="empty">
+                                                <h3>No tools found</h3>
+                                                <p>Try a different search term or category.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </>
+            );
+        }
+
+        createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
